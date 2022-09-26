@@ -60,11 +60,11 @@ public class UserWebController {
     @PostMapping("/saveUser")
     public String register(@Valid @ModelAttribute("user") User user, Errors errors) {
         if (!errors.hasErrors()) {
-            APIUserRequestDTO APIUserRequestDTO = APIUserRequestDTO.builder()
+            APIUserRequestDTO apiUserRequestDTO = APIUserRequestDTO.builder()
                     .name(user.getName())
                     .mobile(user.getMobile())
                     .email(user.getEmail()).build();
-            userController.updateUserById(user.getUserId(), APIUserRequestDTO);
+            userController.updateUserById(user.getUserId(), apiUserRequestDTO);
         }
         return "redirect:/user/";
     }

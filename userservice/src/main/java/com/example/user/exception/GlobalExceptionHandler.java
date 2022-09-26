@@ -37,4 +37,12 @@ public class GlobalExceptionHandler {
         return errorMap;
     }
 
+    @ExceptionHandler(UserGroupNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String,String> handleUserGroupNotFoundException(UserGroupNotFoundException ex){
+        Map<String,String> errorMap = new HashMap<>();
+        errorMap.put("error msg : ",ex.getMessage());
+        return errorMap;
+    }
+
 }

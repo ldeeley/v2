@@ -56,11 +56,13 @@ class UserRepositoryTest  {
 
     @Test
     public void testAddUserGroupsToExistingUser(){
-        User testUser = userRepository.findById(502).get();
+        User testUser = userRepository.findById(503).get();
 
         UserGroup userGroup = userGroupRepository.findById(2).get();
-        testUser.addUserGroup(new UserGroup(3,"Newcastle",new HashSet<>()));
+        testUser.addUserGroup(userGroup);
+        userGroup.addUser(testUser);
         userRepository.save(testUser);
+        userGroupRepository.save(userGroup);
         assertThat(testUser.getUserGroupSet().size()).isEqualTo(2);
 
     }

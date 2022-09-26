@@ -1,7 +1,7 @@
 package com.example.user.controller;
 
 import com.example.user.dto.APIUserRequestDTO;
-import com.example.user.dto.APIUserResponseDTO;
+import com.example.user.model.User;
 import com.example.user.service.BannedUsersClient;
 import com.example.user.service.UserServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import java.util.HashSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -46,18 +47,19 @@ class UserControllerTest {
     @Test
     public void shouldReturnAllUsers() throws Exception{
         // this is what the Mock should do when called
-        when(userService.findAllUsers()).thenReturn(
-                List.of(new APIUserResponseDTO(1,
+        when(userService.findAllUserWithSorting("asc","userId")).thenReturn(
+                List.of(new User(1,
                         "Lester",
                         "lester.deeley@yahoo.com",
-                        "07809886934")));
+                        "7809886934",
+                        "secret",new HashSet<>())));
         // get the Mock to test the endpoint and check the results
         this.mockMvc.perform(MockMvcRequestBuilders.get("/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].userId", Matchers.is(1)))
-                .andExpect(jsonPath("$[0].name",Matchers.is("Lester")))
-                .andExpect(jsonPath("$[0].email",Matchers.is("lester.deeley@yahoo.com")))
-                .andExpect(jsonPath("$.size()",Matchers.is(1)));
+                .andExpect(jsonPath("recordCount",Matchers.is(1)))
+                .andExpect(jsonPath("$.response[0].name",Matchers.is("Lester")))
+                .andExpect(jsonPath("$.response[0].email",Matchers.is("lester.deeley@yahoo.com")))
+                .andExpect(jsonPath("$.response.size()",Matchers.is(1)));;
     }
 
 //    @Test
