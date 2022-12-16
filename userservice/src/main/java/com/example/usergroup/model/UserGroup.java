@@ -9,6 +9,7 @@ import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Builder
 @Setter
 @Getter
@@ -25,10 +26,6 @@ public class UserGroup {
 
     @ManyToMany(mappedBy = "userGroupSet",fetch = FetchType.LAZY)
     private Set<User> userSet = new HashSet<>();
-
-//    public UserGroup(String title) {
-//        this.title = title;
-//    }
 
     public void addUser(User user){
         this.userSet.add(user);

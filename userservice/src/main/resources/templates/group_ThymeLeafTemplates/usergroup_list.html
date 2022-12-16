@@ -9,36 +9,32 @@
 </head>
 <body>
 <div class="container my-2">
-    <h1> RocknRoll AlbumArt  - User List </h1>
-    <a th:href="@{/user/newUserForm}" class="btn btn-primary btn-sm mb-3">Add User</a>
+    <h1> RocknRoll AlbumArt  - User Group List </h1>
+    <a th:href="@{/usergroup/newUserGroupForm}" class="btn btn-success btn-sm mb-3">Add User Group</a>
     <table border="1" class="table table-striped table-responsive-md">
         <thead>
         <tr>
-            <th> User iD </th>
-            <th> User Name </th>
-             <th> User Email </th>
-             <th> User Mobile </th>
+            <th> UserGroup ID </th>
+            <th> UserGroup Title </th>
             <th> Actions </th>
-            <th>         </th>
+             <th> Membership </th>
         </tr>
         <tbody>
-    <tr th:each="user : ${userList}">
-        <td th:text="${user.userId}"></td>
-        <td th:text="${user.name}"></td>
-        <td th:text="${user.email}"></td>
-        <td th:text="${user.mobile}"></td>
-        <td> <a th:href="@{/user/showFormForUpdate/{id}(id=${user.userId})}" class="btn btn-primary">Update</a></td>
-        <td> <a th:href="@{/user/deleteUser/{id}(id=${user.userId})}" class="btn btn-danger">Delete</a></td>
+    <tr th:each="userGroup : ${userGroupList}">
+        <td th:text="${userGroup.userGroupId}"></td>
+        <td th:text="${userGroup.title}"></td>
+        <td> <a th:href="@{/usergroup/showFormForUpdate/{id}(id=${userGroup.userGroupId})}" class="btn btn-success">Update</a></td>
+        <td> <a th:href="@{/usergroup/showUpdateMembers/{id}(id=${userGroup.userGroupId})}" class="btn btn-success">Manage</a></td>
     </tr>
     </tbody>
     </table>
 
     <div class="text-center m-1">
-        <span>Showing Users # [[${startCount}]] to [[${endCount}]] of [[${totalItems}]]</span>
+        <span>Showing UserGroups # [[${startCount}]] to [[${endCount}]] of [[${totalItems}]]</span>
     </div>
     <div th:if="${totalPages>1}">
     <nav>
-        <ul class="pagination justify-content-center flex-wrap" th:with="pageUrlPrefix = '/user/page/'">
+        <ul class="pagination justify-content-center flex-wrap" th:with="pageUrlPrefix = '/usergroup/page/'">
             <li th:class="${currentPage > 1 ? 'page-item':'page-item disabled'}">
                 <a th:href="@{${pageUrlPrefix} + '1'}" class="page-link">First</a>
             </li>

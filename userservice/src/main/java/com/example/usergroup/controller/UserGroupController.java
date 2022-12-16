@@ -1,14 +1,13 @@
 package com.example.usergroup.controller;
 
 import com.example.user.dto.APIResponse;
-import com.example.usergroup.dto.UserGroupRequest;
-import com.example.usergroup.dto.UserGroupDTOResponse;
+import com.example.usergroup.dto.APIUserGroupRequestDTO;
+import com.example.usergroup.dto.APIUserGroupResponseDTO;
 import com.example.usergroup.service.UserGroupServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,28 +22,27 @@ public class UserGroupController {
 
     @GetMapping("")
     @ResponseStatus(HttpStatus.OK)
-    public APIResponse<List<UserGroupDTOResponse>> findAllUserGroupWithSorting(@RequestParam (defaultValue = "asc") String orderBy, @RequestParam (defaultValue = "userGroupId") String sort){
-        List<UserGroupDTOResponse> userGroupDTORespons = userGroupService.findAllUserGroupsWithSorting(orderBy, sort);
-        return new APIResponse<>(userGroupDTORespons.size(), userGroupDTORespons);
+    public APIResponse<List<APIUserGroupResponseDTO>> findAllUserGroupWithSorting(@RequestParam (defaultValue = "asc") String orderBy, @RequestParam (defaultValue = "userGroupId") String sort){
+        List<APIUserGroupResponseDTO> userGroupDTOResponse = userGroupService.findAllUserGroupsWithSorting(orderBy, sort);
+        return new APIResponse<>(userGroupDTOResponse.size(), userGroupDTOResponse);
     }
 
     @PostMapping(value = "",produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<String> createUserGroup(@RequestBody UserGroupRequest userGroupRequest){
-        return userGroupService.createUserGroup(userGroupRequest);
+    public void createUserGroup(@RequestBody APIUserGroupRequestDTO apiUserGroupRequestDTO){
+        userGroupService.createUserGroup(apiUserGroupRequestDTO);
     }
 
     @GetMapping("/{userGroupId}")
     @ResponseStatus(HttpStatus.OK)
-    public Optional<UserGroupDTOResponse> findUserGroupResponseById(@PathVariable Integer userGroupId){
+    public Optional<APIUserGroupResponseDTO> findUserGroupResponseById(@PathVariable Integer userGroupId){
         return userGroupService.findUserGroupById(userGroupId);
     }
 
     @PutMapping("/{userGroupId}")
     @ResponseStatus(HttpStatus.OK)
-    public void updateUserGroupById(@PathVariable Integer userGroupId, @RequestBody UserGroupRequest userGroupRequest){
-        userGroupService.updateUserGroupById(userGroupRequest,userGroupId);
-
+    public void updateUserGroupById(@PathVariable Integer userGroupId, @RequestBody APIUserGroupRequestDTO apiUserGroupRequestDTO){
+        userGroupService.updateUserGroupById(apiUserGroupRequestDTO,userGroupId);
     }
 
     @DeleteMapping("/{userGroupId}")
@@ -55,10 +53,10 @@ public class UserGroupController {
 
 
     @GetMapping("/pagination/{offset}/{pageSize}")
-    public Page<UserGroupDTOResponse> getUserGroupWithOffSetPageSize(@PathVariable int offset,
-                                                                     @PathVariable int pageSize,
-                                                                     @RequestParam (defaultValue = "asc") String orderBy,
-                                                                     @RequestParam (defaultValue = "userGroupId") String sort){
+    public Page<APIUserGroupResponseDTO> getUserGroupWithOffSetPageSize(@PathVariable int offset,
+                                                                        @PathVariable int pageSize,
+                                                                        @RequestParam (defaultValue = "asc") String orderBy,
+                                                                        @RequestParam (defaultValue = "userGroupId") String sort){
         return userGroupService.findUserGroupWithPagination(offset,pageSize, orderBy, sort);
     }
 

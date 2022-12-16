@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class UserGroupRequest {
+public class APIUserGroupRequestDTO {
 
     private int userGroupId;
     private String title;

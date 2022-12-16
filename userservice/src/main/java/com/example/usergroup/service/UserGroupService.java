@@ -1,18 +1,20 @@
 package com.example.usergroup.service;
 
-import com.example.usergroup.dto.UserGroupRequest;
-import com.example.usergroup.dto.UserGroupDTOResponse;
-import org.springframework.http.ResponseEntity;
+import com.example.user.dto.APIUserResponseDTO;
+import com.example.usergroup.dto.APIUserGroupRequestDTO;
+import com.example.usergroup.dto.APIUserGroupResponseDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserGroupService {
 
-    List<UserGroupDTOResponse> findAllUserGroups();
+    List<APIUserGroupResponseDTO> findAllUserGroups();
 
-    public ResponseEntity<String> createUserGroup(UserGroupRequest userGroupRequest);
+    void createUserGroup(APIUserGroupRequestDTO apiUserGroupRequestDTO);
 
-    public Optional<UserGroupDTOResponse> findUserGroupById(Integer id);
+    Optional<APIUserGroupResponseDTO> findUserGroupById(Integer id);
+
+    List<APIUserResponseDTO> findByuserGroupIdLike(Integer userGroupId);
 
 }

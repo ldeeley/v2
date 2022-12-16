@@ -1,8 +1,13 @@
 package com.example.usergroup.controller;
 
 
-import com.example.usergroup.dto.UserGroupDTOResponse;
+import com.example.user.dto.APIUserResponseDTO;
+import com.example.user.model.User;
+import com.example.user.service.UserServiceImpl;
+import com.example.usergroup.dto.APIUserGroupRequestDTO;
+import com.example.usergroup.dto.APIUserGroupResponseDTO;
 import com.example.usergroup.model.UserGroup;
+import com.example.usergroup.service.UserGroupServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -11,7 +16,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.example.usergroup.dto.UserGroupRequest;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -22,72 +26,77 @@ import java.util.Optional;
 @RequestMapping("/usergroup")
 public class UserGroupWebController {
 
+//    @Autowired
+//    UserGroupController userGroupController;
     @Autowired
-    UserGroupController userGroupController;
+    UserServiceImpl userService;
+
+    @Autowired
+    UserGroupServiceImpl userGroupService;
+
+    public static final int pageSize = 10;
+    private static final String GROUP_THYMELEAF_TEMPLATES = "/group_ThymeLeafTemplates/";
 
     @GetMapping("/")
-    public String viewUserGroupPage(Model model){
+     public String viewUserGroupPage(Model model){
         return findPaginated(1,model);
     }
 
-    public static final int pageSize = 10;
-
     @GetMapping("/newUserGroupForm")
-    public String newUserGroupForm(@ModelAttribute("usergroupreq") UserGroupRequest userGroupRequest) {
-        return "new_usergroup";
+    public String newUserGroupForm(@ModelAttribute("usergroupreq") APIUserGroupRequestDTO apiUserGroupRequestDTO) {
+        return GROUP_THYMELEAF_TEMPLATES+"new_usergroup";
     }
 
     @PostMapping("/newUserGroupForm")
-    public String submitForm(@Valid @ModelAttribute("usergroupreq") UserGroupRequest userGroupRequest,
+    public String submitForm(@Valid @ModelAttribute("usergroupreq") APIUserGroupRequestDTO apiUserGroupRequestDTO,
                              BindingResult bindingResult,
                              RedirectAttributes ra) {
         if (bindingResult.hasErrors()) {
-            return "new_usergroup";
+            return GROUP_THYMELEAF_TEMPLATES+"new_usergroup";
         }
-        userGroupController.createUserGroup(userGroupRequest);
-        ra.addFlashAttribute("usergroupreq", userGroupRequest);
+        userGroupService.createUserGroup(apiUserGroupRequestDTO);
+        ra.addFlashAttribute("usergroupreq", apiUserGroupRequestDTO);
         return "redirect:/usergroup/";
     }
 
-//    @GetMapping("/getUserById")
-//    public String getUserById(Model model) {
-////        model.addAttribute("users",userService.getAllUsers());
-//        return "index";
-//    }
-
-//    @PutMapping("/updateUser")
-//    public String updateUser(@ModelAttribute("usergroup") UserGroupRequest userRequest){
-//        userGroupController.updateUserGroupById(id, userRequest);
-//        return "redirect:/getAllUsers";
-//    }
+    @GetMapping("/showUpdateMembers/{userGroupId}")
+    public String updateGroupMembers(@PathVariable (value = "userGroupId") Integer userGroupId, Model model) {
+        //should be optional - fix this
+        APIUserGroupResponseDTO userGroupResponse = userGroupService.findUserGroupById(userGroupId).get();
+        List<User> selectableUsers = userService.findAllUsers();
+        List<Integer> groupMembers = userGroupService.findByuserGroupIdLike(userGroupId).stream().map(APIUserResponseDTO::getUserId).toList();
+        model.addAttribute("usergroup",userGroupResponse);
+        model.addAttribute("selectableUsers",selectableUsers);
+        model.addAttribute("groupMembers",groupMembers);
+        return "user_list_checked";
+    }
 
     @GetMapping("/showFormForUpdate/{userGroupId}")
     public String showFormForUpdate(@PathVariable (value = "userGroupId") Integer id,Model model) {
-        Optional<UserGroupDTOResponse> userGroupResponse = userGroupController.findUserGroupResponseById(id);
-        model.addAttribute("usergroup",userGroupResponse);
-        return "update_usergroup";
+        Optional<APIUserGroupResponseDTO> userGroupResponseDTO = userGroupService.findUserGroupById(id);
+        model.addAttribute("usergroup",userGroupResponseDTO);
+        return GROUP_THYMELEAF_TEMPLATES+"update_usergroup";
     }
 
     @PostMapping("/saveUserGroup")
     public String register(@Valid @ModelAttribute("usergroup") UserGroup userGroup, Errors errors) {
         if (!errors.hasErrors()) {
-            UserGroupRequest userGroupRequest = UserGroupRequest.builder()
+            APIUserGroupRequestDTO apiUserGroupRequestDTO = APIUserGroupRequestDTO.builder()
                     .title(userGroup.getTitle())
                     .build();
-            userGroupController.updateUserGroupById(userGroup.getUserGroupId(), userGroupRequest);
+            userGroupService.updateUserGroupById(apiUserGroupRequestDTO,userGroup.getUserGroupId());
         }
         return "redirect:/usergroup/";
-
     }
 
     @GetMapping("/page/{offset}")
     public String findPaginated(@PathVariable ("offset") int pageNum, Model model ){
 
-        Page<UserGroupDTOResponse> userGroupResponsePage = userGroupController.getUserGroupWithOffSetPageSize(pageNum,
+        Page<APIUserGroupResponseDTO> userGroupResponsePage = userGroupService.findUserGroupWithPagination(pageNum,
                                                                                     pageSize,
                                                                                     "asc",
                                                                                     "userGroupId");
-        List<UserGroupDTOResponse> userGroupList = userGroupResponsePage.getContent();
+        List<APIUserGroupResponseDTO> userGroupList = userGroupResponsePage.getContent();
         model.addAttribute("currentPage",pageNum);
         model.addAttribute("totalPages",userGroupResponsePage.getTotalPages());
         model.addAttribute("totalItems",userGroupResponsePage.getTotalElements());
@@ -98,6 +107,6 @@ public class UserGroupWebController {
         int endCount = startCount + pageSize -1;
         model.addAttribute("endCount",endCount);
 
-        return "usergroup_list";
+        return GROUP_THYMELEAF_TEMPLATES+"usergroup_list";
     }
 }

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>RocknRollAlbumArt</title>
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" rel="stylesheet">
+    <script crossorigin="anonymous"
+            integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
+</head>
+<header th:replace="fragments/header :: header"></header>
+<body>
+
+<div class="container my-2">
+    <a class="btn btn-primary btn-sm mb-3" th:href="@{/user/newUserForm}">Add User</a>
+    <table border="1" class="table table-striped table-responsive-md">
+        <thead>
+        <tr>
+            <th> User iD</th>
+            <th> User Name</th>
+            <th> User Email</th>
+            <th> User Mobile</th>
+            <th> Actions</th>
+            <th></th>
+        </tr>
+        <tbody>
+        <tr th:each="userdto : ${userList}">
+            <td th:text="${userdto.userId}"></td>
+            <td th:text="${userdto.name}"></td>
+            <td th:text="${userdto.email}"></td>
+            <td th:text="${userdto.mobile}"></td>
+            <td><a class="btn btn-primary" th:href="@{/user/showFormForUpdate/{id}(id=${userdto.userId})}">Update</a>
+            </td>
+            <td><a class="btn btn-danger" th:href="@{/user/deleteUser/{id}(id=${userdto.userId})}">Delete</a></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="text-center m-1">
+        <span>Showing Users # [[${startCount}]] to [[${endCount}]] of [[${totalItems}]]</span>
+    </div>
+    <div th:if="${totalPages>1}">
+        <nav>
+            <ul class="pagination justify-content-center flex-wrap" th:with="pageUrlPrefix = '/user/page/'">
+                <li th:class="${currentPage > 1 ? 'page-item':'page-item disabled'}">
+                    <a class="page-link" th:href="@{${pageUrlPrefix} + '1'}">First</a>
+                </li>
+
+                <li th:class="${currentPage > 1  ? 'page-item':'page-item disabled'}">
+                    <a class="page-link" th:href="@{${pageUrlPrefix} + ${currentPage - 1}}">Prev</a>
+                </li>
+
+                <th:block th:if="${totalPages <= 10}">
+                    <li th:class="${currentPage !=i ? 'page-item' : 'page-item-disabled'}"
+                        th:each="i : ${#numbers.sequence(1,totalPages)}">
+                        <a class="page-link" th:href="@{${pageUrlPrefix} + ${i}}"> [[${i}]]</a>
+                    </li>
+                </th:block>
+
+                <th:block th:if="${totalPages > 10}">
+
+                    <th:block th:if="${currentPage <= 5 || currentPage > totalPages -4}">
+                        <li th:class="${currentPage !=i ? 'page-item' : 'page-item-disabled'}"
+                            th:each="i : ${#numbers.sequence(1,5)}">
+                            <a class="page-link" th:href="@{${pageUrlPrefix} + ${i}}"> [[${i}]]</a>
+                        </li>
+                        <a class="page-link" th:href="@{${pageUrlPrefix} + 6 }">...</a>
+                        <li th:class="${currentPage !=i ? 'page-item' : 'page-item-disabled'}"
+                            th:each="i : ${#numbers.sequence(totalPages-4,totalPages)}">
+                            <a class="page-link" th:href="@{${pageUrlPrefix} + ${i}}"> [[${i}]]</a>
+                        </li>
+                    </th:block>
+
+                    <th:block th:if="${currentPage > 5 && currentPage < totalPages -4}">
+                        <a class="page-link" th:href="@{${pageUrlPrefix} + ${currentPage - 5}}">...</a>
+                        <li th:class="${currentPage !=i ? 'page-item' : 'page-item-disabled'}"
+                            th:each="i : ${#numbers.sequence(currentPage - 4,currentPage + 4)}">
+                            <a class="page-link" th:href="@{${pageUrlPrefix} + ${i}}"> [[${i}]]</a>
+                        </li>
+                        <a class="page-link" th:href="@{${pageUrlPrefix} + ${currentPage + 5}}">...</a>
+                    </th:block>
+
+
+                </th:block>
+
+
+                <li th:class="${currentPage < totalPages  ? 'page-item':'page-item disabled'}">
+                    <a class="page-link" th:href="@{${pageUrlPrefix} + ${currentPage + 1}}">Next</a>
+                </li>
+                <li th:class="${currentPage < totalPages  ? 'page-item':'page-item disabled'}">
+                    <a class="page-link" th:href="@{${pageUrlPrefix} + ${totalPages}}">Last</a>
+                </li>
+            </ul>
+        </nav>
+
+    </div>
+
+
+</div>
+</body>
+<footer th:replace="fragments/footer :: footer"></footer>
+</html>

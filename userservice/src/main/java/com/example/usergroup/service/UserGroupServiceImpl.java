@@ -1,23 +1,20 @@
 package com.example.usergroup.service;
 
-import com.example.usergroup.repository.UserGroupRepository;
-import com.example.usergroup.dto.UserGroupRequest;
-import com.example.usergroup.dto.UserGroupDTOResponse;
+import com.example.user.dto.APIUserResponseDTO;
+import com.example.user.repository.UserRepository;
+import com.example.usergroup.dto.APIUserGroupRequestDTO;
+import com.example.usergroup.dto.APIUserGroupResponseDTO;
 import com.example.usergroup.model.UserGroup;
+import com.example.usergroup.repository.UserGroupRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.net.URI;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,30 +28,29 @@ import java.util.Optional;
 public class UserGroupServiceImpl implements UserGroupService{
 
     private final UserGroupRepository userGroupRepository;
+    private final UserRepository userRepository;
 
-    @Cacheable("userGroups")
-    public List<UserGroupDTOResponse> findAllUserGroups(){
+//    @Cacheable("userGroups")
+    public List<APIUserGroupResponseDTO> findAllUserGroups(){
         List<UserGroup> userGroupList = new ArrayList<>();
         userGroupRepository.findAll().forEach(userGroupList::add);
         return userGroupList.stream().map(this::mapToUserGroupResponse).toList();
     }
 
-
-    public List<UserGroupDTOResponse> findAllUserGroupsWithSorting(String orderBy, String field){
+    public List<APIUserGroupResponseDTO> findAllUserGroupsWithSorting(String orderBy, String field){
         List<UserGroup> userGroupList = new ArrayList<>();
         userGroupList.addAll(userGroupRepository.findAll(Sort.by( getSortDirection(orderBy), field)));
         return userGroupList.stream().map(this::mapToUserGroupResponse).toList();
     }
 
-    public void updateUserGroupById(UserGroupRequest userGroupRequest, Integer userGroupId) {
+    public void updateUserGroupById(APIUserGroupRequestDTO apiUserGroupRequestDTO, Integer userGroupId) {
 
             UserGroup userGroup = UserGroup.builder()
                     .userGroupId(userGroupId)
-                    .title(userGroupRequest.getTitle())
+                    .title(apiUserGroupRequestDTO.getTitle())
                     .build();
-            saveUserGroup(userGroup);
-//            userRepository.save(user);
-//            log.info("User {} is saved", user.getEmail());
+            userGroupRepository.save(userGroup);
+            log.info("UserGroup {} is updated", userGroup.getTitle());
 
     }
 
@@ -62,37 +58,37 @@ public class UserGroupServiceImpl implements UserGroupService{
         userGroupRepository.deleteById(userGroupId);
     }
 
+
+    @Transactional(rollbackOn = SQLException.class)
     @Override
-    public ResponseEntity<String> createUserGroup(UserGroupRequest userGroupRequest) {
+    public void createUserGroup(APIUserGroupRequestDTO apiUserGroupRequestDTO) {
 
             UserGroup userGroup = UserGroup.builder()
-                    .title(userGroupRequest.getTitle())
+                    .title(apiUserGroupRequestDTO.getTitle())
                     .build();
-            saveUserGroup(userGroup);           // is this correct , check with Tom ?
-            HttpHeaders responseHeaders = new HttpHeaders();
-            responseHeaders.setLocation(URI.create("/rnr/userGroup/"+userGroup.getUserGroupId()));
-            return new ResponseEntity<>(responseHeaders, HttpStatus.OK);
+            userGroupRepository.save(userGroup);
+            log.info("UserGroup {} is saved", userGroup.getTitle());
+
     }
 
 
-    @Cacheable(value="userGroup",key="#p0")
-    public Optional<UserGroupDTOResponse> findUserGroupById(Integer userGroupId){
+//    @Cacheable(value="userGroup",key="#p0")
+    public Optional<APIUserGroupResponseDTO> findUserGroupById(Integer userGroupId){
         Optional<UserGroup> userGroup = userGroupRepository.findById(userGroupId);
         return userGroup.map(this::mapToUserGroupResponse);
     }
 
-    private UserGroupDTOResponse mapToUserGroupResponse(UserGroup userGroup){
-        return UserGroupDTOResponse.builder()
+    @Override
+    public List<APIUserResponseDTO> findByuserGroupIdLike(Integer userGroupId) {
+//        List<APIUserResponseDTO> apiUserResponseDTOList = userRepository.findB
+        return null;
+    }
+
+    private APIUserGroupResponseDTO mapToUserGroupResponse(UserGroup userGroup){
+        return APIUserGroupResponseDTO.builder()
                 .userGroupId(userGroup.getUserGroupId())
                 .title(userGroup.getTitle())
                 .build();
-    }
-
-    // added this method but is it really necessary ?
-    @Transactional(rollbackOn = SQLException.class)
-    void saveUserGroup(UserGroup userGroup){
-        userGroupRepository.save(userGroup);
-        log.info("User {} is saved", userGroup.getTitle());
     }
 
     private Sort.Direction getSortDirection(String direction) {
@@ -104,7 +100,7 @@ public class UserGroupServiceImpl implements UserGroupService{
         return Sort.Direction.ASC;
     }
 
-    public Page<UserGroupDTOResponse> findUserGroupWithPagination(int offset, int pageSize, String orderBy, String field){
+    public Page<APIUserGroupResponseDTO> findUserGroupWithPagination(int offset, int pageSize, String orderBy, String field){
 
         return userGroupRepository.findAll(PageRequest.of(offset-1, pageSize).withSort(getSortDirection(orderBy),field)).map(this::mapToUserGroupResponse);
     }
